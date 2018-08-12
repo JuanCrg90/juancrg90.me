@@ -1,0 +1,24 @@
+{
+  "name": "juancrg90-2018",
+  "version": "1.0.0",
+  "description": "My personal Site 2018",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next"
+  },
+  "author": "Juan Carlos Ruiz",
+  "license": "ISC",
+  "dependencies": {
+    "next": "^6.1.1",
+    "next-images": "^0.10.6",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
+  },
+  "devDependencies": {
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb": "^17.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.10.0"
+  }
+}
