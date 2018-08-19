@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const MenuElement = props => (
   <li>
-    <Link href={props.path}><a>{props.linkName}</a></Link>
+    <Link href={props.href}><a>{props.linkName}</a></Link>
     <style jsx>
       {`
         li {
@@ -21,8 +21,8 @@ const MenuElement = props => (
 const Menu = () => (
   <nav>
     <ul>
-      <MenuElement path="/about" linkName="About" />
-      <MenuElement path="/essays" linkName="Essays" />
+      <MenuElement href="/" linkName="Home" />
+      <MenuElement href="/essays" linkName="Essays" />
     </ul>
     <style jsx>
       {`
