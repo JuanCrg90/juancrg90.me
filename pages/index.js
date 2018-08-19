@@ -1,4 +1,5 @@
 import MainLayout from '../layouts/main';
+import Social from '../components/social';
 import MagmaLabs from '../components/magmalabs';
 
 const Index = () => (
@@ -6,6 +7,7 @@ const Index = () => (
     <header>
       <h1>Juan Carlos Ruiz</h1>
       <h2>Software Engineer at <MagmaLabs /> | Geek | Maker |Oompa Loompa 24/7 | Just a Dreamer</h2>
+      <Social />
     </header>
     <style jsx>
       {`
