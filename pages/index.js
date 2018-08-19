@@ -26,6 +26,9 @@ const Index = () => (
     </header>
     <style jsx>
       {`
+        h1, h2 {
+          font-weight: 200;
+        }
         header {
           display: flex;
           text-align: center;
