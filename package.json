@@ -4,11 +4,14 @@
   "description": "My personal Site 2018",
   "main": "index.js",
   "scripts": {
-    "dev": "next"
+    "dev": "next",
+    "build": "next build",
+    "export": "next export -o dist"
   },
   "author": "Juan Carlos Ruiz",
   "license": "ISC",
   "dependencies": {
+    "compose-function": "^3.0.3",
     "next": "^6.1.1",
     "next-images": "^0.10.6",
     "react": "^16.4.2",
