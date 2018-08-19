@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { Component } from 'react';
+import Menu from '../components/menu';
 
 class MainLayout extends Component {
   render() {
@@ -12,6 +13,7 @@ class MainLayout extends Component {
             Juan Carlos Ruiz - Software Engineer
           </title>
         </Head>
+        <Menu />
         {children}
 
         <style jsx global>
