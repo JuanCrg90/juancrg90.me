@@ -28,60 +28,67 @@ const essays2014 = [
 import Link from 'next/link'
 function Essay({ essay }) {
   const renderLink = () => {
-    if(essay.slug.includes('http')) {
-      return <a href={essay.slug} target="_blank" rel="noopener noreferrer">{essay.title}</a>
-    } else {
-      return <Link href={`essays/${essay.slug}`}><a>{essay.title}</a></Link>
+    if (essay.slug.includes('http')) {
+      return <a href={essay.slug} target="_blank" rel="noopener noreferrer">{essay.title}</a>;
     }
+    return <Link href={`${essay.slug}`}><a>{essay.title}</a></Link>;
   };
 
   return (
     <article>
-      <PublishedAt datetime={essay.date} date={ new Date(essay.date)}/>
+      <PublishedAt datetime={essay.date} date={new Date(essay.date)} />
       {renderLink(essay)}
-      <small><a className='source' href={essay.sourceUrl}>[{essay.source}]</a></small>
+      <small><a className="source" href={essay.sourceUrl}>[{essay.source}]</a></small>
       <style jsx global>
         {`
           .publishedAt {
             margin-right: 1em;
+          }
+
+          a {
+            color: #000;
+            text-decoration: none;
+          }
+
+          a:hover {
+            text-decoration: underline;
+          }
+        `}
+      </style>
+      <style jsx>
+        {`
+          .source {
+            margin-left: 0.5em;
         }
       `}
-    </style>
-    <style jsx>
-      {`
-        .source {
-          margin-left: 0.5em;
-      }
-    `}
-    </style>
-  </article>
-);
-
-
+      </style>
+    </article>
+  );
 }
+
 const Essays = () => (
   <MainLayout>
     <section>
       <h1>2018</h1>
       {essays2018.map(essay => <Essay essay={essay} />)}
 
-    <h1>2016</h1>
-    {essays2016.map(essay => <Essay essay={essay} />)}
+      <h1>2016</h1>
+      {essays2016.map(essay => <Essay essay={essay} />)}
 
-    <h1>2015</h1>
-    {essays2015.map(essay => <Essay essay={essay} />)}
+      <h1>2015</h1>
+      {essays2015.map(essay => <Essay essay={essay} />)}
 
-    <h1>2014</h1>
-    {essays2014.map(essay => <Essay essay={essay} />)}
-  </section>
-  <style jsx>
-    {`
-      section {
-        margin: 0 10vh;
-        width: 100%;
-      }
-    `}
-  </style>
+      <h1>2014</h1>
+      {essays2014.map(essay => <Essay essay={essay} />)}
+    </section>
+    <style jsx>
+      {`
+        section {
+          margin: 0 10vh;
+          width: 100%;
+        }
+      `}
+    </style>
   </MainLayout>
 );
 
