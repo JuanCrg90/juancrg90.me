@@ -7,7 +7,7 @@
     "dev": "next",
     "build": "next build",
     "export": "next export -o dist",
-    "deploy": "next build && npm run export && aws s3 sync dist/ s3://juancrg90-site"
+    "deploy": "next build && npm run export && aws s3 sync dist/ s3://juancrg90.me"
   },
   "author": "Juan Carlos Ruiz",
   "license": "ISC",
