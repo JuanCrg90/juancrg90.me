@@ -8,10 +8,14 @@ function PublishedAt({ dateTime, date }) {
       {format(date, 'MMMM DD, YYYY')}
       <style jsx>{`
         .publishedAt {
-          display: inline-block;
-        }
-        .publishedAt {
+          font-size: 0.75em;
+          display: block;
           padding: 1em 0;
+        }
+        @media (min-width: 720px) {
+          .publishedAt {
+            display: inline-block;
+          }
         }
       `}</style>
     </time>

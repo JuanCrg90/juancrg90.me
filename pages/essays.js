@@ -41,10 +41,6 @@ function Essay({ essay }) {
       <small><a className="source" href={essay.sourceUrl}>[{essay.source}]</a></small>
       <style jsx global>
         {`
-          .publishedAt {
-            margin-right: 1em;
-          }
-
           a {
             color: #000;
             text-decoration: none;
@@ -53,6 +49,12 @@ function Essay({ essay }) {
           a:hover {
             text-decoration: underline;
           }
+          @media (min-width: 720px) {
+            .publishedAt {
+              margin-right: 1em;
+            }
+          }
+
         `}
       </style>
       <style jsx>
@@ -70,22 +72,27 @@ const Essays = () => (
   <MainLayout>
     <section>
       <h1>2018</h1>
-      {essays2018.map(essay => <Essay essay={essay} />)}
+      {essays2018.map(essay => <Essay key={essay.slug} essay={essay} />)}
 
       <h1>2016</h1>
-      {essays2016.map(essay => <Essay essay={essay} />)}
+      {essays2016.map(essay => <Essay key={essay.slug} essay={essay} />)}
 
       <h1>2015</h1>
-      {essays2015.map(essay => <Essay essay={essay} />)}
+      {essays2015.map(essay => <Essay key={essay.slug} essay={essay} />)}
 
       <h1>2014</h1>
-      {essays2014.map(essay => <Essay essay={essay} />)}
+      {essays2014.map(essay => <Essay key={essay.slug} essay={essay} />)}
     </section>
     <style jsx>
       {`
         section {
-          margin: 0 10vh;
-          width: 100%;
+          margin: 0.5em;
+        }
+        @media (min-width: 720px) {
+          section {
+            margin: 1em;
+            margin: 0 10vh;
+          }
         }
       `}
     </style>
