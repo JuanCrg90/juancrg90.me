@@ -14,6 +14,7 @@ function PublishedAt({ dateTime, date }) {
         }
         @media (min-width: 720px) {
           .publishedAt {
+            font-size: 1em;
             display: inline-block;
           }
         }
