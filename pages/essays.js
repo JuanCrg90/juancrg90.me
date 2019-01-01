@@ -2,6 +2,7 @@ import MainLayout from '../layouts/main';
 import PublishedAt from '../components/published-at';
 
 const essays2018 = [
+  { source: 'self', sourceUrl: '/', title: 'Bye bye 2018', slug: 'bye-bye-2018', date: '2018-12-31T23:59' },
   { source: 'self', sourceUrl: '/', title: 'Compilando para el navegador con WebAssembly', slug: 'compilando-para-el-navegador-con-webassembly', date: '2018-04-28T22:04' },
   {source: 'MagmaLabs', sourceUrl: 'http://magmalabs.io', title: 'Adding Docker to your Rails workflow', slug: 'http://blog.magmalabs.io/2018/04/24/adding-docker-rails-workflow.html', date: '2018-04-24'},
   {source: 'MagmaLabs', sourceUrl: 'http://magmalabs.io', title: 'Generating documentation with Rspec Rails Swagger', slug: 'http://blog.magmalabs.io/2018/03/27/generating-documentation-rspec-rails-swagger.html', date: '2018-03-27'},
