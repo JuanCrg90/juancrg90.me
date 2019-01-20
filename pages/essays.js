@@ -1,6 +1,10 @@
 import MainLayout from '../layouts/main';
 import PublishedAt from '../components/published-at';
 
+const essays2019 = [
+  { source: 'self', sourceUrl: '/', title: 'Encapsulating a C library using Ruby ffi', slug: 'learning-ruby-ffi', date: '2019-01-20T00:00' },
+];
+
 const essays2018 = [
   { source: 'self', sourceUrl: '/', title: 'Bye bye 2018', slug: 'bye-bye-2018', date: '2018-12-31T23:59' },
   { source: 'self', sourceUrl: '/', title: 'Compilando para el navegador con WebAssembly', slug: 'compilando-para-el-navegador-con-webassembly', date: '2018-04-28T22:04' },
@@ -72,6 +76,9 @@ function Essay({ essay }) {
 const Essays = () => (
   <MainLayout>
     <section>
+      <h1>2019</h1>
+      {essays2019.map(essay => <Essay key={essay.slug} essay={essay} />)}
+
       <h1>2018</h1>
       {essays2018.map(essay => <Essay key={essay.slug} essay={essay} />)}
 
