@@ -66,6 +66,10 @@ class EssayLayout extends Component {
           img {
             max-width: 100%;
           }
+
+          pre {
+            overflow-x: scroll;
+          }
         `}
         </style>
       </main>
