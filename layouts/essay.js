@@ -3,6 +3,7 @@ import { Component } from 'react';
 
 import Menu from '../components/menu';
 import PostMeta from '../components/post-meta';
+import TwitterCard from '../components/twitter-card';
 
 
 class EssayLayout extends Component {
@@ -11,10 +12,16 @@ class EssayLayout extends Component {
     return new Date(meta.date);
   }
 
+  get url() {
+    const { meta } = this.props;
+    return `http://juancrg90.me/essays/${meta.slug}/`;
+  }
+
   render() {
     const { children, meta } = this.props;
     return (
       <main>
+
         <Head>
           <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,6 +40,13 @@ class EssayLayout extends Component {
           <meta name="msapplication-config" content="/static/browserconfig.xml" />
           <meta name="theme-color" content="#ffffff" />
         </Head>
+
+        <TwitterCard
+          title={meta.title}
+          url={this.url}
+          description={meta.description}
+        />
+
         <Menu />
         <section>
           <PostMeta

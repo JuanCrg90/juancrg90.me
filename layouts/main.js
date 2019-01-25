@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { Component } from 'react';
+import TwitterCard from '../components/twitter-card';
 import Menu from '../components/menu';
 
 class MainLayout extends Component {
@@ -24,6 +25,7 @@ class MainLayout extends Component {
           <meta name="msapplication-config" content="/static/browserconfig.xml" />
           <meta name="theme-color" content="#ffffff" />
         </Head>
+        <TwitterCard />
         <Menu />
         {children}
 
