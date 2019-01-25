@@ -4,6 +4,7 @@ import { Component } from 'react';
 import Menu from '../components/menu';
 import PostMeta from '../components/post-meta';
 import TwitterCard from '../components/twitter-card';
+import OpenGraph from '../components/open-graph';
 
 
 class EssayLayout extends Component {
@@ -42,6 +43,12 @@ class EssayLayout extends Component {
         </Head>
 
         <TwitterCard
+          title={meta.title}
+          url={this.url}
+          description={meta.description}
+        />
+
+        <OpenGraph
           title={meta.title}
           url={this.url}
           description={meta.description}
