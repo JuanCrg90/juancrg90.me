@@ -1,13 +1,26 @@
+const companyLogo = require('../images/logo_magma.svg');
+
+const company = {
+  logo: companyLogo,
+  url: 'https://www.magmalabs.io/',
+  altUrl: 'MagmaLabs site',
+  altLogo: 'MagmaLabs logo'
+};
 
 const MagmaLabs = () => (
   <div>
-    <a href="https://www.magmalabs.io/" target="_blank" rel="noopener noreferrer" alt="MagmaLabs site">
-      <img className="logo-magma" src={require('../images/logo_magma.svg')} alt="MagmaLabs logo" />
+    <a
+      href={company.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      alt={company.altUrl}
+    >
+      <img className="logo-magma" src={company.logo} alt={company.altLogo} />
     </a>
     <style jsx>
       {`
         div {
-            display: inline;
+          display: inline;
         }
         img {
           height: 1em;

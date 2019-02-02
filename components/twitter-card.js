@@ -1,7 +1,16 @@
 import Head from 'next/head';
 import PropTypes from 'prop-types';
 
-function TwitterCard({ type, site, creator, url, title, description, image, summary }) {
+function TwitterCard({
+  type,
+  site,
+  creator,
+  url,
+  title,
+  description,
+  image,
+  summary
+}) {
   return (
     <Head>
       <meta name="twitter:card" value={type} key="type" />
@@ -24,7 +33,7 @@ TwitterCard.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
   image: PropTypes.string,
-  summary: PropTypes.string,
+  summary: PropTypes.string
 };
 
 TwitterCard.defaultProps = {
@@ -34,8 +43,9 @@ TwitterCard.defaultProps = {
   url: 'http://juancrg90.me/',
   title: 'Juan Carlos Ruiz',
   description: 'Software Engineer',
-  image: 'https://res.cloudinary.com/juancrg90/image/upload/v1548389081/juan_c_tjj7ix.png',
-  summary: 'Juan Carlos Ruiz personal website ',
+  image:
+    'https://res.cloudinary.com/juancrg90/image/upload/v1548389081/juan_c_tjj7ix.png',
+  summary: 'Juan Carlos Ruiz personal website'
 };
 
 export default TwitterCard;

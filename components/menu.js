@@ -1,8 +1,11 @@
 import Link from 'next/link';
+import PropTypes from 'prop-types';
 
-const MenuElement = props => (
+const MenuElement = ({ href, linkName }) => (
   <li>
-    <Link href={props.href}><a>{props.linkName}</a></Link>
+    <Link href={href}>
+      <a>{linkName}</a>
+    </Link>
     <style jsx>
       {`
         li {
@@ -36,5 +39,10 @@ const Menu = () => (
     </style>
   </nav>
 );
+
+MenuElement.propTypes = {
+  href: PropTypes.string.isRequired,
+  linkName: PropTypes.string.isRequired
+};
 
 export default Menu;
