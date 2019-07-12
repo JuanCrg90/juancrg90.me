@@ -10,6 +10,14 @@ const essays2019 = [
     title: 'Encapsulating a C library using Ruby ffi',
     slug: 'learning-ruby-ffi',
     date: '2019-01-20T00:00'
+  },
+  {
+    source: 'MagmaLabs',
+    sourceUrl: 'http://magmalabs.io',
+    title: ' Automate all the things!',
+    slug:
+      'http://blog.magmalabs.io/2019/03/26/automate-all-the-things.html',
+    date: '2019-03-26'
   }
 ];
 
