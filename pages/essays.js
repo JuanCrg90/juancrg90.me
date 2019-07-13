@@ -7,9 +7,9 @@ const essays2019 = [
   {
     source: 'self',
     sourceUrl: '/',
-    title: 'Encapsulating a C library using Ruby ffi',
-    slug: 'learning-ruby-ffi',
-    date: '2019-01-20T00:00'
+    title: 'vpr a CLI to visit quickly GitHub project sections',
+    slug: 'vpr-a-cli-to-visit-quickly-github-project-sections',
+    date: '2019-07-12T00:00'
   },
   {
     source: 'MagmaLabs',
@@ -18,6 +18,13 @@ const essays2019 = [
     slug:
       'http://blog.magmalabs.io/2019/03/26/automate-all-the-things.html',
     date: '2019-03-26'
+  },
+  {
+    source: 'self',
+    sourceUrl: '/',
+    title: 'Encapsulating a C library using Ruby ffi',
+    slug: 'learning-ruby-ffi',
+    date: '2019-01-20T00:00'
   }
 ];
 
