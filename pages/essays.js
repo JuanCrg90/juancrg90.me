@@ -5,6 +5,14 @@ import PublishedAt from '../components/published-at';
 
 const essays2019 = [
   {
+    source: 'MagmaLabs',
+    sourceUrl: 'http://magmalabs.io',
+    title: 'Customizing Solidus order number generation',
+    slug:
+      'http://blog.magmalabs.io/2019/08/05/customizing-solidus-order-number-generation.html',
+    date: '2019-08-05'
+  },
+  {
     source: 'self',
     sourceUrl: '/',
     title: 'vpr a CLI to visit quickly GitHub project sections',
