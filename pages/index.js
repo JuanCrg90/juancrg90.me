@@ -6,7 +6,7 @@ const Index = () => (
   <MainLayout>
     <header>
       <h1>Juan Carlos Ruiz</h1>
-      <h2>Software Engineer at <MagmaLabs /> | Geek | Maker |Oompa Loompa 24/7 | Just a Dreamer</h2>
+      <h2>Software Engineer | Remote Worker | Geek | Oompa Loompa 24/7 | Just a Dreamer</h2>
       <Social />
     </header>
     <style jsx>
