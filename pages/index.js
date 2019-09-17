@@ -1,6 +1,5 @@
 import MainLayout from '../layouts/main';
 import Social from '../components/social';
-import MagmaLabs from '../components/magmalabs';
 
 const Index = () => (
   <MainLayout>
