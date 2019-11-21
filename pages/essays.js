@@ -5,6 +5,14 @@ import PublishedAt from '../components/published-at';
 
 const essays2019 = [
   {
+    source: 'DEV',
+    sourceUrl: 'https://dev.to',
+    title: 'Maintaining an open source gem in the Hacktoberfest',
+    slug:
+      'https://dev.to/juancrg90/maintaining-an-open-source-gem-in-the-hacktoberfest-5hh',
+    date: '2019-10-25'
+  },
+  {
     source: 'MagmaLabs',
     sourceUrl: 'http://magmalabs.io',
     title: 'Customizing Solidus order number generation',
