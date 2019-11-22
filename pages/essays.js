@@ -197,27 +197,27 @@ function Essay({ essay }) {
 const Essays = () => (
   <MainLayout>
     <section>
-      <h1>2019</h1>
+      <h2>2019</h2>
       {essays2019.map(essay => (
         <Essay key={essay.slug} essay={essay} />
       ))}
 
-      <h1>2018</h1>
+      <h2>2018</h2>
       {essays2018.map(essay => (
         <Essay key={essay.slug} essay={essay} />
       ))}
 
-      <h1>2016</h1>
+      <h2>2016</h2>
       {essays2016.map(essay => (
         <Essay key={essay.slug} essay={essay} />
       ))}
 
-      <h1>2015</h1>
+      <h2>2015</h2>
       {essays2015.map(essay => (
         <Essay key={essay.slug} essay={essay} />
       ))}
 
-      <h1>2014</h1>
+      <h2>2014</h2>
       {essays2014.map(essay => (
         <Essay key={essay.slug} essay={essay} />
       ))}
