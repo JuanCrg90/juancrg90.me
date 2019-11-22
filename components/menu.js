@@ -26,6 +26,7 @@ const Menu = () => (
     <ul>
       <MenuElement href="/" linkName="Home" />
       <MenuElement href="/essays" linkName="Essays" />
+      <MenuElement href="/projects" linkName="Projects" />
     </ul>
     <style jsx>
       {`
