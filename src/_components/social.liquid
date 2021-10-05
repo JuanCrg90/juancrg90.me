@@ -1,0 +1,13 @@
+<article class="social">
+  <ul>
+    {{site.data.social_networks }}
+    {% for social_network in social_networks %}
+      <li>
+        <a href={{social_network.url}}>
+          {% svg {{social_network.icon}}, class: "icon" %}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</article>
+

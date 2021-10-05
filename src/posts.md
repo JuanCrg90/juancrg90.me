@@ -6,7 +6,7 @@ permalink: /posts/
 
 <ul>
   {% for post in site.posts %}
-    <li>
+    <li class="post-link">
       <a href="{{ post.url }}">{{ post.title }}</a>
     </li>
   {% endfor %}

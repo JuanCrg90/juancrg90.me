@@ -2,6 +2,12 @@
 layout: default
 ---
 
-<h1>Home Page</h1>
+{{content}}
 
-{{ content }}
+<header>
+  <h1>Juan Carlos Ruiz</h1>
+  <h2>Software Engineer | Remote Worker | Geek | Oompa Loompa 24/7 | Just a Dreamer</h2>
+
+  {% render "social", social_networks: site.data.social_networks %}
+</header>
+
