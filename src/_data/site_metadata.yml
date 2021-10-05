@@ -7,4 +7,13 @@
 title: Juan C. Ruiz
 tagline: Software Engineer.
 description: >-
-  JuanCrg90 Personal Website.
+  Juan C. Ruiz Personal Website.
+type: website,
+image: 'https://res.cloudinary.com/juancrg90/image/upload/v1548389081/juan_c_tjj7ix.png'
+image_alt: 'Juan Carlos Ruiz - Software Engineer'
+url: 'http://juancrg90.me/'
+site_name: 'Juan C. Ruiz'
+locale: 'en'
+twitter_type: 'summary_large_image'
+twitter_site: '@JuanCrg90'
+twitter_creator: '@JuanCrg90'
