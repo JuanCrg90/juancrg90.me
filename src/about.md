@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-![Juan C. Ruiz](http://res.cloudinary.com/juancrg90/image/upload/v1533321266/avatar/Photo_on_8-3-18_at_11.14_AM_2.jpg)
+<img src="http://res.cloudinary.com/juancrg90/image/upload/v1533321266/avatar/Photo_on_8-3-18_at_11.14_AM_2.jpg" alt="Juan C. Ruiz" class="avatar">
 
 Juan C. Ruiz is a software engineer, community leader, and mentor that loves knowledge sharing and teamwork. He is part of the [X-Team](https://x-team.com) community where Senior Developers are connected with companies that looks for remote talent. Since 2013 he has been participating in different technological communities and mentorship programs like [RubyMe](https://rubyme.org), trying to help others to accelerate their careers in engineering and software development. Currently, he is a co-organizer of a local meetup called [Calzada Code](https://calzadacode.dev) where the community shares their knowledge about software development.
 
