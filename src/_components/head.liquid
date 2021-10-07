@@ -7,7 +7,7 @@
 
 {% render "opengraph", metadata: metadata %}
 {% render "twitter_card", metadata: metadata %}
-
 <link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" />
 <link rel="stylesheet" href="{% webpack_path css %}" />
 <script src="{% webpack_path js %}" defer></script>
+{% render "google_analytics" %}
