@@ -69,12 +69,17 @@ nav > ul {
   width: 100%;
 }
 
-.post {
+.post main {
   a {
     text-decoration: underline;
   }
 
   img {
     width: 100%;
+  }
+
+  .center {
+    display: flex;
+    justify-content: center;
   }
 }

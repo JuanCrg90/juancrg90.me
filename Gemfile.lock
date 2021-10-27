@@ -88,6 +88,8 @@ GEM
     multipart-post (2.1.1)
     nokogiri (1.12.5-arm64-darwin)
       racc (~> 1.4)
+    nokogiri (1.12.5-x86_64-darwin)
+      racc (~> 1.4)
     public_suffix (4.0.6)
     racc (1.5.2)
     rb-fsevent (0.11.0)
@@ -109,6 +111,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-20
+  x86_64-darwin-20
 
 DEPENDENCIES
   bridgetown (~> 0.21.4)
