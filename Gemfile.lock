@@ -41,6 +41,8 @@ GEM
       webrick (~> 1.7)
     bridgetown-paginate (0.21.4)
       bridgetown-core (= 0.21.4)
+    bridgetown-seo-tag (5.0.0)
+      bridgetown (>= 0.20.0, < 2.0)
     bridgetown-svg-inliner (1.0.2)
       bridgetown (>= 0.20, < 2.0)
       nokogiri
@@ -115,7 +117,8 @@ PLATFORMS
 
 DEPENDENCIES
   bridgetown (~> 0.21.4)
+  bridgetown-seo-tag
   bridgetown-svg-inliner (~> 1.0)
 
 BUNDLED WITH
-   2.2.28
+   2.2.31
