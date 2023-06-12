@@ -5,7 +5,6 @@ date: 2023-06-11 00:00:00 -0500
 categories: Rails, Ruby, Hotwire, Turbo
 permalink: /posts/como-utilizar-turbo-frame-tag-en-un-layout-personalizado
 ---
-#
 
 Me encuentro trabajando en un side project utilizando Rails 7 y Hotwire, una de las funciones que implementé fue una ventana modal la cual es llamada utilizando `turbo_frame_tag` para hacer el render del formulario de creación. Todo iba bien hasta que decidí incluir un layout personalizado para el dashboard del usuario con sesión.
 
