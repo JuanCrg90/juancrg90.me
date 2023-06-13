@@ -19,14 +19,14 @@ end
 De esta manera pasamos de tener
 
 ```bash
-foo_bar_index POST   /foo/bar(.:format)                                                                                foo/bar#create
-  new_foo_bar GET    /foo/bar/new(.:format)                                                                            foo/bar#new
-      foo_bar GET    /foo/bar/:id(.:format)                                                                            foo/bar#show
+foo_bar_index POST   /foo/bar(.:format)       foo/bar#create
+  new_foo_bar GET    /foo/bar/new(.:format)   foo/bar#new
+      foo_bar GET    /foo/bar/:id(.:format)   foo/bar#show
 ```
 
 A tener
 ```bash
-foo_bar_index POST   /bar(.:format)                                                                                    foo/bar#create
-  new_foo_bar GET    /bar/new(.:format)                                                                                foo/bar#new
-      foo_bar GET    /bar/:id(.:format)                                                                                foo/bar#show
+foo_bar_index POST   /bar(.:format)      foo/bar#create
+  new_foo_bar GET    /bar/new(.:format   foo/bar#new
+      foo_bar GET    /bar/:id(.:format)  foo/bar#show
 ```
