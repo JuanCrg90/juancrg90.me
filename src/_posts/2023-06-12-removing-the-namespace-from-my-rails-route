@@ -4,10 +4,6 @@ title: "Removing the namespace from my Rails route"
 date: 2023-06-12 00:00:00 -0500
 categories: Rails, Ruby
 permalink: /posts/removing-the-namespace-from-my-rails-route
-
-
-
-
 ---
 
 If, for any reason, you have specified a namespace in your Rails routes and want to remove it from your route, going from **http://localhost:3000/foo/bars/1** to **http://localhost:3000/bars/1**
