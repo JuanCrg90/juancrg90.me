@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Begin Bridgetown SEO tag v5.0.0 -->
+<title>Mastering Google’s New Places API: Shadow DOM Styling, Form Prepopulation, and Real-World Integration | Juan C. Ruiz</title>
+<meta property="og:title" content="Mastering Google’s New Places API: Shadow DOM Styling, Form Prepopulation, and Real-World Integration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Google’s new Places API introduces powerful web components that make location autocomplete easier than ever. However, integrating these components into existing applications comes with unique challenges, particularly around styling and form integration. This post documents our journey implementing Google Places autocomplete in a Rails application, including solutions to the trickiest problems we encountered." />
+<meta property="og:description" content="Google’s new Places API introduces powerful web components that make location autocomplete easier than ever. However, integrating these components into existing applications comes with unique challenges, particularly around styling and form integration. This post documents our journey implementing Google Places autocomplete in a Rails application, including solutions to the trickiest problems we encountered." />
+<link rel="canonical" href="/posts/mastering-google-places-new-api" />
+<meta property="og:url" content="/posts/mastering-google-places-new-api" />
+<meta property="og:site_name" content="Juan C. Ruiz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2025-06-23T05:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Mastering Google’s New Places API: Shadow DOM Styling, Form Prepopulation, and Real-World Integration" />
+<!-- End Bridgetown SEO tag -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" />
+<link rel="stylesheet" href="/_bridgetown/static/css/main.2d02f55dc6fc19703e21.css" />
+<script src="/_bridgetown/static/js/main.0811b103c2b1181ddec3.js" defer></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-56736524-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-56736524-1');
+</script>
+
+
+
+  </head>
+  <body class="post ">
+    <nav>
+  <ul>
+    <li>
+      <a href="/">Home</a>
+    </li>
+    <li>
+      <a href="/about">About</a>
+    </li>
+    <li>
+      <a href="/posts">Posts</a>
+    </li>
+  </ul>
+</nav>
+
+
+    <main>
+      <div class="post">
+  <h1>Mastering Google's New Places API: Shadow DOM Styling, Form Prepopulation, and Real-World Integration</h1>
+
+  <p>Google’s new Places API introduces powerful web components that make location autocomplete easier than ever. However, integrating these components into existing applications comes with unique challenges, particularly around styling and form integration. This post documents our journey implementing Google Places autocomplete in a Rails application, including solutions to the trickiest problems we encountered.</p>
+
+<h2 id="the-new-google-places-api-a-game-changer">The New Google Places API: A Game Changer</h2>
+
+<p>Google’s latest Places API introduces the <code class="highlighter-rouge">&lt;gmp-place-autocomplete&gt;</code> web component, which replaces the traditional JavaScript-based autocomplete. This new approach offers several advantages:</p>
+
+<ul>
+  <li><strong>Simplified Integration</strong>: No need to manually create input elements and manage dropdown positioning</li>
+  <li><strong>Better Performance</strong>: Optimized by Google with built-in caching and request optimization</li>
+  <li><strong>Enhanced UX</strong>: Consistent styling and behavior across all implementations</li>
+  <li><strong>Future-Proof</strong>: Built on web standards with ongoing Google support</li>
+</ul>
+
+<h2 id="basic-implementation">Basic Implementation</h2>
+
+<h3 id="1-setting-up-the-api">1. Setting Up the API</h3>
+
+<p>First, you’ll need to configure your Google Maps API key. The new Places API requires both the “Places API (New)” and “Maps JavaScript API” to be enabled in your Google Cloud Console.</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- app/views/layouts/application.html.erb --&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">if</span> <span class="n">google_maps_api_key</span><span class="p">.</span><span class="nf">present?</span> <span class="cp">%&gt;</span>
+  <span class="nt">&lt;script&gt;</span>
+    <span class="p">(</span><span class="nx">g</span><span class="o">=&gt;</span><span class="p">{</span><span class="kd">var</span> <span class="nx">h</span><span class="p">,</span><span class="nx">a</span><span class="p">,</span><span class="nx">k</span><span class="p">,</span><span class="nx">p</span><span class="o">=</span><span class="dl">"</span><span class="s2">The Google Maps JavaScript API</span><span class="dl">"</span><span class="p">,</span><span class="nx">c</span><span class="o">=</span><span class="dl">"</span><span class="s2">google</span><span class="dl">"</span><span class="p">,</span><span class="nx">l</span><span class="o">=</span><span class="dl">"</span><span class="s2">importLibrary</span><span class="dl">"</span><span class="p">,</span><span class="nx">q</span><span class="o">=</span><span class="dl">"</span><span class="s2">__ib__</span><span class="dl">"</span><span class="p">,</span><span class="nx">m</span><span class="o">=</span><span class="nb">document</span><span class="p">,</span><span class="nx">b</span><span class="o">=</span><span class="nb">window</span><span class="p">;</span><span class="nx">b</span><span class="o">=</span><span class="nx">b</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="o">||</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span><span class="o">=</span><span class="p">{});</span><span class="kd">var</span> <span class="nx">d</span><span class="o">=</span><span class="nx">b</span><span class="p">.</span><span class="nx">maps</span><span class="o">||</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">maps</span><span class="o">=</span><span class="p">{}),</span><span class="nx">r</span><span class="o">=</span><span class="k">new</span> <span class="nb">Set</span><span class="p">,</span><span class="nx">e</span><span class="o">=</span><span class="k">new</span> <span class="nx">URLSearchParams</span><span class="p">,</span><span class="nx">u</span><span class="o">=</span><span class="p">()</span><span class="o">=&gt;</span><span class="nx">h</span><span class="o">||</span><span class="p">(</span><span class="nx">h</span><span class="o">=</span><span class="k">new</span> <span class="nb">Promise</span><span class="p">(</span><span class="k">async</span><span class="p">(</span><span class="nx">f</span><span class="p">,</span><span class="nx">n</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span><span class="k">await</span> <span class="p">(</span><span class="nx">a</span><span class="o">=</span><span class="nx">m</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="dl">"</span><span class="s2">script</span><span class="dl">"</span><span class="p">));</span><span class="nx">e</span><span class="p">.</span><span class="kd">set</span><span class="p">(</span><span class="dl">"</span><span class="s2">libraries</span><span class="dl">"</span><span class="p">,[...</span><span class="nx">r</span><span class="p">]</span><span class="o">+</span><span class="dl">""</span><span class="p">);</span><span class="k">for</span><span class="p">(</span><span class="nx">k</span> <span class="k">in</span> <span class="nx">g</span><span class="p">)</span><span class="nx">e</span><span class="p">.</span><span class="kd">set</span><span class="p">(</span><span class="nx">k</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/</span><span class="se">[</span><span class="sr">A-Z</span><span class="se">]</span><span class="sr">/g</span><span class="p">,</span><span class="nx">t</span><span class="o">=&gt;</span><span class="dl">"</span><span class="s2">_</span><span class="dl">"</span><span class="o">+</span><span class="nx">t</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">toLowerCase</span><span class="p">()),</span><span class="nx">g</span><span class="p">[</span><span class="nx">k</span><span class="p">]);</span><span class="nx">e</span><span class="p">.</span><span class="kd">set</span><span class="p">(</span><span class="dl">"</span><span class="s2">callback</span><span class="dl">"</span><span class="p">,</span><span class="nx">c</span><span class="o">+</span><span class="dl">"</span><span class="s2">.maps.</span><span class="dl">"</span><span class="o">+</span><span class="nx">q</span><span class="p">);</span><span class="nx">a</span><span class="p">.</span><span class="nx">src</span><span class="o">=</span><span class="s2">`https://maps.</span><span class="p">${</span><span class="nx">c</span><span class="p">}</span><span class="s2">apis.com/maps/api/js?`</span><span class="o">+</span><span class="nx">e</span><span class="p">;</span><span class="nx">d</span><span class="p">[</span><span class="nx">q</span><span class="p">]</span><span class="o">=</span><span class="nx">f</span><span class="p">;</span><span class="nx">a</span><span class="p">.</span><span class="nx">onerror</span><span class="o">=</span><span class="p">()</span><span class="o">=&gt;</span><span class="nx">h</span><span class="o">=</span><span class="nx">n</span><span class="p">(</span><span class="nb">Error</span><span class="p">(</span><span class="nx">p</span><span class="o">+</span><span class="dl">"</span><span class="s2"> could not load.</span><span class="dl">"</span><span class="p">));</span><span class="nx">a</span><span class="p">.</span><span class="nx">nonce</span><span class="o">=</span><span class="nx">m</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">"</span><span class="s2">script[nonce]</span><span class="dl">"</span><span class="p">)?.</span><span class="nx">nonce</span><span class="o">||</span><span class="dl">""</span><span class="p">;</span><span class="nx">m</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">a</span><span class="p">)}));</span><span class="nx">d</span><span class="p">[</span><span class="nx">l</span><span class="p">]?</span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="nx">p</span><span class="o">+</span><span class="dl">"</span><span class="s2"> only loads once. Ignoring:</span><span class="dl">"</span><span class="p">,</span><span class="nx">g</span><span class="p">):</span><span class="nx">d</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="nx">f</span><span class="p">,...</span><span class="nx">n</span><span class="p">)</span><span class="o">=&gt;</span><span class="nx">r</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="nx">u</span><span class="p">().</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="nx">d</span><span class="p">[</span><span class="nx">l</span><span class="p">](</span><span class="nx">f</span><span class="p">,...</span><span class="nx">n</span><span class="p">))})</span>
+      <span class="p">({</span><span class="na">key</span><span class="p">:</span> <span class="dl">"</span><span class="cp">&lt;%=</span> <span class="n">google_maps_api_key</span> <span class="cp">%&gt;</span><span class="dl">"</span><span class="p">,</span> <span class="na">v</span><span class="p">:</span> <span class="dl">"</span><span class="s2">weekly</span><span class="dl">"</span><span class="p">});</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span>
+</code></pre></div></div>
+
+<h3 id="2-basic-html-structure">2. Basic HTML Structure</h3>
+
+<p>The simplest implementation uses the web component directly:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;gmp-place-autocomplete</span>
+  <span class="na">requested-language=</span><span class="s">"</span><span class="cp">&lt;%=</span> <span class="no">I18n</span><span class="p">.</span><span class="nf">locale</span> <span class="cp">%&gt;</span><span class="s">"</span>
+  <span class="na">requested-region=</span><span class="s">"MX"</span>
+  <span class="na">data-place-autocomplete-target=</span><span class="s">"autocomplete"</span>
+  <span class="na">placeholder=</span><span class="s">"Enter a location"</span>
+<span class="nt">&gt;&lt;/gmp-place-autocomplete&gt;</span>
+</code></pre></div></div>
+
+<h4 id="localization-attributes">Localization Attributes</h4>
+
+<p>The <code class="highlighter-rouge">&lt;gmp-place-autocomplete&gt;</code> component supports localization through two key attributes:</p>
+
+<ul>
+  <li>
+    <p><strong><code class="highlighter-rouge">requested-language</code></strong>: Sets the language for place suggestions and UI text. Use standard language codes like <code class="highlighter-rouge">"en"</code>, <code class="highlighter-rouge">"es"</code>, <code class="highlighter-rouge">"fr"</code>, etc. In Rails applications, you can dynamically set this using <code class="highlighter-rouge">&lt;%= I18n.locale %&gt;</code> to match your application’s current locale.</p>
+  </li>
+  <li>
+    <p><strong><code class="highlighter-rouge">requested-region</code></strong>: Biases search results toward a specific country or region using ISO 3166-1 Alpha-2 country codes. For example, <code class="highlighter-rouge">"MX"</code> for Mexico, <code class="highlighter-rouge">"US"</code> for United States, <code class="highlighter-rouge">"CA"</code> for Canada. This helps prioritize local results for better user experience.</p>
+  </li>
+</ul>
+
+<p>These attributes work together to provide localized, region-appropriate place suggestions that match your application’s target audience.</p>
+
+<h3 id="3-javascript-integration">3. JavaScript Integration</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// app/javascript/controllers/place_autocomplete_controller.js</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">Controller</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">"</span><span class="s2">@hotwired/stimulus</span><span class="dl">"</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="kd">class</span> <span class="kd">extends</span> <span class="nx">Controller</span> <span class="p">{</span>
+  <span class="kd">static</span> <span class="nx">targets</span> <span class="o">=</span> <span class="p">[</span><span class="dl">"</span><span class="s2">autocomplete</span><span class="dl">"</span><span class="p">]</span>
+
+  <span class="k">async</span> <span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">initializeAutocomplete</span><span class="p">()</span>
+  <span class="p">}</span>
+
+  <span class="k">async</span> <span class="nx">initializeAutocomplete</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">google</span> <span class="o">||</span> <span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">initializeAutocomplete</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
+      <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="k">await</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">importLibrary</span><span class="p">(</span><span class="dl">"</span><span class="s2">places</span><span class="dl">"</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">autocompleteTarget</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">gmp-select</span><span class="dl">'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onPlaceSelect</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">))</span>
+  <span class="p">}</span>
+
+  <span class="k">async</span> <span class="nx">onPlaceSelect</span><span class="p">({</span> <span class="nx">placePrediction</span> <span class="p">})</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">place</span> <span class="o">=</span> <span class="nx">placePrediction</span><span class="p">.</span><span class="nx">toPlace</span><span class="p">()</span>
+    <span class="k">await</span> <span class="nx">place</span><span class="p">.</span><span class="nx">fetchFields</span><span class="p">({</span>
+      <span class="na">fields</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">displayName</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">formattedAddress</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">googleMapsURI</span><span class="dl">'</span><span class="p">]</span>
+    <span class="p">})</span>
+
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Selected place:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">place</span><span class="p">.</span><span class="nx">displayName</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Google Maps URL:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">place</span><span class="p">.</span><span class="nx">googleMapsURI</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-shadow-dom-challenge">The Shadow DOM Challenge</h2>
+
+<p>Here’s where things get interesting. Google’s <code class="highlighter-rouge">&lt;gmp-place-autocomplete&gt;</code> component uses a <strong>closed Shadow DOM</strong>, which means you cannot style it with external CSS. This is a significant departure from traditional web development practices.</p>
+
+<h3 id="understanding-the-shadow-dom-structure">Understanding the Shadow DOM Structure</h3>
+
+<p>When you inspect the component, you’ll see something like this:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;gmp-place-autocomplete&gt;</span>
+  #shadow-root (closed)
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"widget-container"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"input-container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"autocomplete-icon"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;svg&gt;</span>...<span class="nt">&lt;/svg&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;input</span> <span class="na">aria-autocomplete=</span><span class="s">"list"</span> <span class="err">...</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"focus-ring"</span><span class="nt">&gt;&lt;/div&gt;</span>
+        <span class="nt">&lt;button</span> <span class="na">class=</span><span class="s">"clear-button"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/button&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"predictions-anchor"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"dropdown"</span><span class="nt">&gt;</span>...<span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/gmp-place-autocomplete&gt;</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">#shadow-root (closed)</code> means external CSS cannot penetrate this boundary. Traditional approaches like this <strong>will not work</strong>:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* This won't work! */</span>
+<span class="nt">gmp-place-autocomplete</span> <span class="nt">input</span> <span class="p">{</span>
+  <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="m">#ccc</span><span class="p">;</span>
+  <span class="nl">padding</span><span class="p">:</span> <span class="m">8px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="the-shadow-dom-styling-solution">The Shadow DOM Styling Solution</h2>
+
+<p>After extensive research and experimentation, we developed a solution that monkey-patches the <code class="highlighter-rouge">attachShadow</code> method to force the Shadow DOM to be open, allowing us to inject custom styles.</p>
+
+<h3 id="the-monkey-patch-approach">The Monkey Patch Approach</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">setupShadowDOMStyling</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">gmpShadowPatched</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">originalAttachShadow</span> <span class="o">=</span> <span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">attachShadow</span>
+
+    <span class="nx">Element</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">attachShadow</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">init</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">localName</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">gmp-place-autocomplete</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Force shadow DOM to be open so we can style it</span>
+        <span class="kd">const</span> <span class="nx">shadow</span> <span class="o">=</span> <span class="nx">originalAttachShadow</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">{</span>
+          <span class="p">...</span><span class="nx">init</span><span class="p">,</span>
+          <span class="na">mode</span><span class="p">:</span> <span class="dl">"</span><span class="s2">open</span><span class="dl">"</span>
+        <span class="p">})</span>
+
+        <span class="kd">const</span> <span class="nx">style</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="dl">"</span><span class="s2">style</span><span class="dl">"</span><span class="p">)</span>
+        <span class="nx">style</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="s2">`
+          /* Style the input container to match Tailwind border and shadow */
+          .input-container {
+            border: 1px solid #9CA3AF !important;
+            border-radius: 6px !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            background-color: white !important;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+          }
+
+          /* Focus state for the container */
+          .input-container:focus-within {
+            border-color: #3B82F6 !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px #3B82F6 !important;
+          }
+
+          /* Style the input itself minimally */
+          input {
+            border: none !important;
+            outline: none !important;
+            font-size: 14px !important;
+            font-family: inherit !important;
+            line-height: 1.5 !important;
+            background: transparent !important;
+            padding: 8px 12px !important;
+            padding-left: 40px !important; /* Space for search icon */
+            padding-right: 40px !important; /* Space for clear button */
+          }
+
+          /* Hide Google's default focus ring since we're styling the container */
+          .focus-ring {
+            display: none !important;
+          }
+
+          /* Ensure icons stay in correct position */
+          .autocomplete-icon {
+            position: absolute !important;
+            left: 12px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 1 !important;
+          }
+
+          .clear-button {
+            position: absolute !important;
+            right: 12px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 1 !important;
+            background: none !important;
+            border: none !important;
+            cursor: pointer !important;
+          }
+        `</span>
+
+        <span class="nx">shadow</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">style</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nx">shadow</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">originalAttachShadow</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">init</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nb">window</span><span class="p">.</span><span class="nx">gmpShadowPatched</span> <span class="o">=</span> <span class="kc">true</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="critical-styling-considerations">Critical Styling Considerations</h3>
+
+<p>When styling the Shadow DOM, you must be careful not to break Google’s internal layout system. Our initial aggressive approach caused icons to appear outside the input field. The key lessons learned:</p>
+
+<ol>
+  <li><strong>Style the container, not the input</strong>: Apply borders and shadows to <code class="highlighter-rouge">.input-container</code> rather than the <code class="highlighter-rouge">input</code> element</li>
+  <li><strong>Preserve icon positioning</strong>: Don’t override positioning properties that Google uses for internal layout</li>
+  <li><strong>Use minimal overrides</strong>: Only change what’s necessary for visual consistency</li>
+  <li><strong>Maintain proper padding</strong>: Ensure adequate space for search and clear icons</li>
+</ol>
+
+<h2 id="form-integration-and-data-flow">Form Integration and Data Flow</h2>
+
+<h3 id="hidden-fields-pattern">Hidden Fields Pattern</h3>
+
+<p>For proper form integration, we use hidden fields that get populated when a place is selected:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- Hidden fields for form submission --&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">hidden_field</span> <span class="ss">:location</span>  <span class="cp">%&gt;</span>
+<span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">hidden_field</span> <span class="ss">:maps_link</span> <span class="cp">%&gt;</span>
+
+<span class="c">&lt;!-- Visible autocomplete component --&gt;</span>
+<span class="nt">&lt;gmp-place-autocomplete</span>
+  <span class="na">inputValue=</span><span class="s">"</span><span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">object</span><span class="p">.</span><span class="nf">location</span> <span class="cp">%&gt;</span><span class="s">"</span>
+  <span class="na">data-place-autocomplete-target=</span><span class="s">"autocomplete"</span>
+  <span class="na">placeholder=</span><span class="s">"Enter location"</span>
+<span class="nt">&gt;&lt;/gmp-place-autocomplete&gt;</span>
+</code></pre></div></div>
+
+<h3 id="updating-hidden-fields">Updating Hidden Fields</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="nx">onPlaceSelect</span><span class="p">({</span> <span class="nx">placePrediction</span> <span class="p">})</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">place</span> <span class="o">=</span> <span class="nx">placePrediction</span><span class="p">.</span><span class="nx">toPlace</span><span class="p">()</span>
+    <span class="k">await</span> <span class="nx">place</span><span class="p">.</span><span class="nx">fetchFields</span><span class="p">({</span>
+      <span class="na">fields</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">displayName</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">formattedAddress</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">googleMapsURI</span><span class="dl">'</span><span class="p">]</span>
+    <span class="p">})</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">updateFallbackFields</span><span class="p">(</span><span class="nx">place</span><span class="p">.</span><span class="nx">displayName</span><span class="p">,</span> <span class="nx">place</span><span class="p">.</span><span class="nx">googleMapsURI</span><span class="p">)</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error processing place selection:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">updateFallbackFields</span><span class="p">(</span><span class="nx">location</span><span class="p">,</span> <span class="nx">mapsUrl</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">hasFallbackTarget</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">locationInput</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">fallbackTarget</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">input[type="text"]</span><span class="dl">'</span><span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">mapsInput</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">fallbackTarget</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">input[type="url"]</span><span class="dl">'</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">locationInput</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">locationInput</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">location</span>
+      <span class="nx">locationInput</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="k">new</span> <span class="nx">Event</span><span class="p">(</span><span class="dl">'</span><span class="s1">change</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">bubbles</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}))</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">mapsInput</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">mapsInput</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">mapsUrl</span>
+      <span class="nx">mapsInput</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="k">new</span> <span class="nx">Event</span><span class="p">(</span><span class="dl">'</span><span class="s1">change</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">bubbles</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}))</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="form-prepopulation-the-tricky-part">Form Prepopulation: The Tricky Part</h2>
+
+<p>One of the most challenging aspects is prepopulating the autocomplete component with existing data when editing a form. The <code class="highlighter-rouge">inputValue</code> attribute should work, but in practice, it requires careful timing and implementation.</p>
+
+<h3 id="setting-initial-values">Setting Initial Values</h3>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;gmp-place-autocomplete</span>
+  <span class="na">inputValue=</span><span class="s">"</span><span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">object</span><span class="p">.</span><span class="nf">location</span> <span class="k">if</span> <span class="n">form</span><span class="p">.</span><span class="nf">object</span><span class="p">.</span><span class="nf">respond_to?</span><span class="p">(</span><span class="ss">:location</span><span class="p">)</span> <span class="cp">%&gt;</span><span class="s">"</span>
+  <span class="na">data-place-autocomplete-target=</span><span class="s">"autocomplete"</span>
+  <span class="na">placeholder=</span><span class="s">"Enter location"</span>
+<span class="nt">&gt;&lt;/gmp-place-autocomplete&gt;</span>
+</code></pre></div></div>
+
+<h3 id="javascript-prepopulation">JavaScript Prepopulation</h3>
+
+<p>Sometimes the <code class="highlighter-rouge">inputValue</code> attribute isn’t sufficient, especially for dynamically loaded content. Here’s a JavaScript approach:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">populateExistingValues</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">autocompleteTarget</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">internalInput</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">autocompleteTarget</span><span class="p">.</span><span class="nx">shadowRoot</span><span class="p">?.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">)</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">internalInput</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">internalInput</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">autocompleteTarget</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="dl">"</span><span class="s2">inputValue</span><span class="dl">"</span><span class="p">)</span>
+        <span class="nx">internalInput</span><span class="p">.</span><span class="nx">dispatchEvent</span><span class="p">(</span><span class="k">new</span> <span class="nx">Event</span><span class="p">(</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span> <span class="na">bubbles</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}))</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="mi">300</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The timeout is crucial because the web component needs time to fully initialize before we can access its internal structure.</p>
+
+<h2 id="fallback-strategy">Fallback Strategy</h2>
+
+<p>Always provide a fallback for users who experience issues with the Google Places API:</p>
+
+<div class="language-erb highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"hidden"</span> <span class="na">data-place-autocomplete-target=</span><span class="s">"fallback"</span><span class="nt">&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">text_field</span> <span class="ss">:location</span><span class="p">,</span>
+      <span class="ss">placeholder: </span><span class="s2">"Enter location manually"</span><span class="p">,</span>
+      <span class="ss">class: </span><span class="s2">"form-input"</span> <span class="cp">%&gt;</span>
+  <span class="cp">&lt;%=</span> <span class="n">form</span><span class="p">.</span><span class="nf">url_field</span> <span class="ss">:maps_link</span><span class="p">,</span>
+      <span class="ss">placeholder: </span><span class="s2">"Enter Google Maps URL"</span><span class="p">,</span>
+      <span class="ss">class: </span><span class="s2">"form-input"</span> <span class="cp">%&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+
+<span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"button"</span>
+        <span class="na">data-action=</span><span class="s">"click-&gt;place-autocomplete#toggleInputMode"</span><span class="nt">&gt;</span>
+  Enter location manually
+<span class="nt">&lt;/button&gt;</span>
+</code></pre></div></div>
+
+<h2 id="error-handling-and-graceful-degradation">Error Handling and Graceful Degradation</h2>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="nx">initializeAutocomplete</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">google</span> <span class="o">||</span> <span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">setTimeout</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">initializeAutocomplete</span><span class="p">(),</span> <span class="mi">100</span><span class="p">)</span>
+      <span class="k">return</span>
+    <span class="p">}</span>
+
+    <span class="k">await</span> <span class="nx">google</span><span class="p">.</span><span class="nx">maps</span><span class="p">.</span><span class="nx">importLibrary</span><span class="p">(</span><span class="dl">"</span><span class="s2">places</span><span class="dl">"</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">autocompleteTarget</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">'</span><span class="s1">gmp-select</span><span class="dl">'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">onPlaceSelect</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">))</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">populateExistingValues</span><span class="p">()</span>
+
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="dl">'</span><span class="s1">Error initializing Google Places Autocomplete:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">error</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">showError</span><span class="p">()</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">showError</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">errorDiv</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">div</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nx">errorDiv</span><span class="p">.</span><span class="nx">className</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">text-red-600 text-sm mt-1</span><span class="dl">'</span>
+  <span class="nx">errorDiv</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Unable to load location suggestions. Please enter manually.</span><span class="dl">'</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">.error-message</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">errorDiv</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="dl">'</span><span class="s1">error-message</span><span class="dl">'</span><span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">element</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">errorDiv</span><span class="p">)</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="testing-considerations">Testing Considerations</h2>
+
+<p>Testing Google Places integration requires special considerations due to the custom web components:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># test/system/google_places_autocomplete_test.rb</span>
+<span class="k">class</span> <span class="nc">GooglePlacesAutocompleteTest</span> <span class="o">&lt;</span> <span class="no">ApplicationSystemTestCase</span>
+  <span class="nb">test</span> <span class="s2">"place autocomplete component loads"</span> <span class="k">do</span>
+    <span class="n">visit</span> <span class="n">edit_event_path</span><span class="p">(</span><span class="vi">@event</span><span class="p">)</span>
+
+
+    <span class="c1"># Check that the Google Places autocomplete elements are present</span>
+    <span class="c1"># Using page.body.include? since Capybara doesn't recognize custom web components</span>
+    <span class="n">assert</span> <span class="n">page</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="s2">"gmp-place-autocomplete"</span><span class="p">),</span> <span class="s2">"Page should contain gmp-place-autocomplete elements"</span>
+
+    <span class="c1"># Count the number of autocomplete elements</span>
+    <span class="n">autocomplete_count</span> <span class="o">=</span> <span class="n">page</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">scan</span><span class="p">(</span><span class="sr">/&lt;gmp-place-autocomplete/</span><span class="p">).</span><span class="nf">length</span>
+    <span class="n">assert_equal</span> <span class="mi">1</span><span class="p">,</span> <span class="n">autocomplete_count</span><span class="p">,</span> <span class="s2">"Should have 1 place autocomplete elements"</span>
+
+    <span class="c1"># Check that form fields are present</span>
+    <span class="n">assert</span> <span class="n">page</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="s2">"location"</span><span class="p">),</span> <span class="s2">"Page should contain location field"</span>
+    <span class="n">assert</span> <span class="n">page</span><span class="p">.</span><span class="nf">body</span><span class="p">.</span><span class="nf">include?</span><span class="p">(</span><span class="s2">"maps_link"</span><span class="p">),</span> <span class="s2">"Page should contain maps_link field"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h3 id="key-testing-challenges">Key Testing Challenges</h3>
+
+<ol>
+  <li><strong>Custom Web Components</strong>: Capybara doesn’t recognize <code class="highlighter-rouge">gmp-place-autocomplete</code> elements with standard selectors, requiring <code class="highlighter-rouge">page.body.include?</code> checks</li>
+  <li><strong>Shadow DOM</strong>: Internal component structure is hidden, making direct element testing difficult</li>
+  <li><strong>Authentication</strong>: System tests require proper user authentication flow via <code class="highlighter-rouge">system_sign_in</code> helper</li>
+  <li><strong>API Dependencies</strong>: Full functionality requires Google Maps API keys and network access</li>
+</ol>
+
+<h2 id="performance-and-cost-considerations">Performance and Cost Considerations</h2>
+
+<p>The new Places API has different pricing than the legacy version:</p>
+
+<ul>
+  <li><strong>Places Autocomplete</strong>: $0.00282 per request (first 100,000 requests/month free)</li>
+  <li><strong>Places Details</strong>: $0.017 per request</li>
+  <li><strong>Monitor usage</strong> in Google Cloud Console to avoid surprises</li>
+</ul>
+
+<h2 id="key-takeaways">Key Takeaways</h2>
+
+<ol>
+  <li><strong>Shadow DOM styling requires creative solutions</strong>: The monkey patch approach is currently the only way to style closed Shadow DOM components</li>
+  <li><strong>Form integration needs careful planning</strong>: Use hidden fields and proper event handling for seamless form submission</li>
+  <li><strong>Prepopulation is tricky</strong>: Timing is crucial when setting initial values</li>
+  <li><strong>Always provide fallbacks</strong>: Not all users will have JavaScript enabled or API access</li>
+  <li><strong>Test thoroughly</strong>: The integration has many moving parts that need comprehensive testing</li>
+</ol>
+
+<h2 id="future-considerations">Future Considerations</h2>
+
+<p>Google may eventually provide official styling APIs for their web components. Until then, the Shadow DOM monkey patch remains the most reliable solution for custom styling. Monitor Google’s documentation for updates to the Places API and web component specifications.</p>
+
+<h2 id="references">References</h2>
+
+<h3 id="official-documentation">Official Documentation</h3>
+<ul>
+  <li><a href="https://developers.google.com/maps/documentation/places/web-service/overview">Google Places API (New) Documentation</a></li>
+  <li><a href="https://developers.google.com/maps/documentation/javascript/overview">Google Maps JavaScript API</a></li>
+  <li><a href="https://developers.google.com/maps/documentation/javascript/reference/places-widget">Place Autocomplete Widget Reference</a></li>
+  <li><a href="https://developers.google.com/maps/documentation/javascript/place-autocomplete-new#add-an-autocomplete-widget-to-a-web-page">Place Autocomplete Widget</a></li>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM">Web Components and Shadow DOM</a></li>
+  <li><a href="https://developers.google.com/maps/billing-and-pricing/pricing">Google Maps Platform Pricing</a></li>
+</ul>
+
+<h3 id="community-resources--solutions">Community Resources &amp; Solutions</h3>
+<ul>
+  <li><a href="https://stackoverflow.com/questions/79556333/how-to-style-google-maps-placeautocompleteelement-to-match-existing-form-inputs">How to style Google Maps PlaceAutocompleteElement to match existing form inputs?</a></li>
+</ul>
+
+<h3 id="technical-deep-dives">Technical Deep Dives</h3>
+<ul>
+  <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow">MDN: attachShadow() method</a> - Understanding Shadow DOM manipulation</li>
+  <li><a href="https://css-tricks.com/an-introduction-to-web-components/">CSS-Tricks: Shadow DOM</a> - Web Components and styling strategies</li>
+</ul>
+
+<hr />
+
+<p><em>This implementation was developed through extensive experimentation and testing. While the Shadow DOM styling approach works reliably, it’s technically a “hack” that could potentially break with future Google updates. Always test thoroughly and have fallback plans in place.</em></p>
+
+</div>
+
+    </main>
+  </body>
+</html>

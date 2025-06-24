@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Begin Bridgetown SEO tag v5.0.0 -->
+<title>Optimizing costs in GitHub Actions | Juan C. Ruiz</title>
+<meta property="og:title" content="Optimizing costs in GitHub Actions" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Recently in EasyBroker we decided to migrate our continuous integration system to GitHub Actions." />
+<meta property="og:description" content="Recently in EasyBroker we decided to migrate our continuous integration system to GitHub Actions." />
+<link rel="canonical" href="/posts/optimizing-costs-in-github-actions" />
+<meta property="og:url" content="/posts/optimizing-costs-in-github-actions" />
+<meta property="og:site_name" content="Juan C. Ruiz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-30T05:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Optimizing costs in GitHub Actions" />
+<!-- End Bridgetown SEO tag -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" />
+<link rel="stylesheet" href="/_bridgetown/static/css/main.2d02f55dc6fc19703e21.css" />
+<script src="/_bridgetown/static/js/main.0811b103c2b1181ddec3.js" defer></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-56736524-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-56736524-1');
+</script>
+
+
+
+  </head>
+  <body class="post ">
+    <nav>
+  <ul>
+    <li>
+      <a href="/">Home</a>
+    </li>
+    <li>
+      <a href="/about">About</a>
+    </li>
+    <li>
+      <a href="/posts">Posts</a>
+    </li>
+  </ul>
+</nav>
+
+
+    <main>
+      <div class="post">
+  <h1>Optimizing costs in GitHub Actions</h1>
+
+  <p>Recently in <a href="https://www.easybroker.com/">EasyBroker</a> we decided to migrate our continuous integration system to GitHub Actions.</p>
+
+<p>Our first setup was a workflow with 12 containers considering a good idea to quickly identify errors in our tests.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_e9sjqq.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled.png" /></p>
+
+<p>The average time per container was about 6 minutes, while only 2 containers in specific (models and a group of controllers) took about 12 minutes.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892643/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_1_rbxmvb.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%201.png" /></p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892643/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_2_oornut.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%202.png" /></p>
+
+<p>After a week working with this new implementation, we received a message from GitHub warning us about we were near to consume all the minutes of the free tier that they provides  💸💸💸, so we decided to investigate.</p>
+
+<p>First of all, we noticed the 10 containers that took 6 minutes to complete the task, 4 minutes were for setup.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892643/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_3_ryutfn.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%203.png" /></p>
+
+<p>Later we found despite we had the cache “configured”, our container was downloading the gems over and over again.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_4_mkohr1.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%204.png" /></p>
+
+<p>And finally, the tests were taken only between 20 and 50 seconds of the process.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_5_dhlisu.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%205.png" /></p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892643/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_6_u1saes.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%206.png" /></p>
+
+<h2 id="saving-some-minutes">Saving some minutes</h2>
+
+<p>The first change that we did was going from 12 containers to 2. Considering the agent controller tests takes most of the time, we decided to merge the models container with the other 10 containers that were taken between 20 and 50 seconds to complete the tests, ending with a configuration like the following.</p>
+
+<p>Before</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">strategy</span><span class="pi">:</span>
+      <span class="na">fail-fast</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">matrix</span><span class="pi">:</span>
+        <span class="na">test_folder</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">models</span><span class="pi">,</span> <span class="nv">helpers</span><span class="pi">,</span> <span class="nv">jobs</span><span class="pi">,</span> <span class="nv">lib</span><span class="pi">,</span> <span class="nv">mailers</span><span class="pi">,</span> <span class="nv">presenters</span><span class="pi">,</span> <span class="nv">services</span><span class="pi">,</span> <span class="nv">controllers/*.rb</span><span class="pi">,</span> <span class="nv">controllers/admin</span><span class="pi">,</span> <span class="nv">controllers/agent</span><span class="pi">,</span> <span class="nv">controllers/webhooks</span><span class="pi">,</span> <span class="nv">controllers/api</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<p>Now</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">strategy</span><span class="pi">:</span>
+      <span class="na">fail-fast</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">matrix</span><span class="pi">:</span>
+        <span class="na">test_folder</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">models helpers test/jobs test/lib test/mailers test/presenters test/services test/controllers/*.rb test/controllers/admin test/controllers/webhooks testcontrollers/api</span><span class="pi">,</span> <span class="nv">controllers/agent</span><span class="pi">]</span>
+
+</code></pre></div></div>
+
+<p>The next change was updating the cache setup to make it work, our configuration was using the version 1 of <code class="highlighter-rouge">actions/cache</code> and we were including the <code class="highlighter-rouge">restore-keys</code> option, the documentation mentions that this input is <a href="https://github.com/actions/cache#inputs">optional</a>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Gem cache</span>
+        <span class="s">uses</span><span class="err">:</span> <span class="s">actions/cache@v1</span>
+        <span class="s">with</span><span class="err">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">vendor/bundle</span>
+          <span class="na">key</span><span class="pi">:</span> <span class="s">$-gems-$</span>
+          <span class="na">restore-keys</span><span class="pi">:</span> <span class="pi">|</span>
+            <span class="s">$-gems-</span>
+</code></pre></div></div>
+
+<p>So I updated to version 2 of the action and I removed the <code class="highlighter-rouge">restore-keys</code> input considering is not necessary at this moment.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Gem cache</span>
+        <span class="s">uses</span><span class="err">:</span> <span class="s">actions/cache@v2</span>
+        <span class="s">with</span><span class="err">:</span>
+          <span class="na">path</span><span class="pi">:</span> <span class="s">vendor/bundle</span>
+          <span class="na">key</span><span class="pi">:</span> <span class="s">$-gem-use-ruby-$</span>
+</code></pre></div></div>
+
+<p>In addition to that, reviewing the step where the dependencies are installed, I found that we had it merged with the step to create the database and it showed us a deprecation warning when executing bundle install with the flag to indicate the installation path of the gems.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Bundle Install and Create DB</span>
+        <span class="s">env</span><span class="err">:</span>
+          <span class="na">RAILS_ENV</span><span class="pi">:</span> <span class="s">test</span>
+          <span class="na">DB_PASSWORD</span><span class="pi">:</span> <span class="s">root</span>
+          <span class="na">DB_PORT</span><span class="pi">:</span> <span class="s">$</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">sudo /etc/init.d/mysql start</span>
+          <span class="s">cp config/database.ci.yml config/database.yml</span>
+          <span class="s">gem install bundler --version 2.0.2 --no-ri --no-rdoc</span>
+          <span class="s">bundle install --jobs 4 --retry 3 --path vendor/bundle</span>
+          <span class="s">bin/rails db:setup</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>DEPRECATED] The <span class="sb">`</span><span class="nt">--path</span><span class="sb">`</span> flag is deprecated because it relies on being remembered across bundler invocations, which bundler will no longer <span class="k">do in </span>future versions. Instead please use <span class="sb">`</span>bundle config <span class="nb">set </span>path <span class="s1">'vendor/bundle'</span><span class="sb">`</span>, and stop using this flag
+</code></pre></div></div>
+
+<p>So I opted to separate it into 2 separate steps and update the way the bundler detects the location of the gems.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Bundle install</span>
+        <span class="s">run</span><span class="err">:</span> <span class="pi">|</span>
+          <span class="s">gem install bundler --version 2.0.2 --no-ri --no-rdoc</span>
+          <span class="s">bundle config path vendor/bundle</span>
+          <span class="s">bundle install --jobs 4 --retry 3</span>
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">Create DB</span>
+        <span class="s">env</span><span class="err">:</span>
+          <span class="na">RAILS_ENV</span><span class="pi">:</span> <span class="s">test</span>
+          <span class="na">DB_PASSWORD</span><span class="pi">:</span> <span class="s">root</span>
+          <span class="na">DB_PORT</span><span class="pi">:</span> <span class="s">$</span>
+        <span class="na">run</span><span class="pi">:</span> <span class="pi">|</span>
+          <span class="s">sudo /etc/init.d/mysql start</span>
+          <span class="s">cp config/database.ci.yml config/database.yml</span>
+          <span class="s">bin/rails db:setup</span>
+</code></pre></div></div>
+
+<p>With these little tweaks we were able to pass from 4 minutes installing the gems in just 4 seconds.</p>
+
+<p>Before</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_7_tawvjy.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%207.png" /></p>
+
+<p>Now</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_8_dyhwlj.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%208.png" /></p>
+
+<p>As a final step for this first stage of optimization, I took a look at the steps where we did the installation of some dependencies using <code class="highlighter-rouge">apt-get</code> and I found that some calls were unnecessary. For example, when we verified the MySQL connection, we were trying to install the client that is already installed in the container and this took about 20 seconds (between verify the installation and perform the connection test). Removing this unnecessary <code class="highlighter-rouge">apt-get</code> call we were able to down the time to 6 seconds.</p>
+
+<p>Before</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892645/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_9_odbx1j.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%209.png" /></p>
+
+<p>Now</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_10_s1uik1.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%2010.png" /></p>
+
+<h2 id="takeaways">Takeaways</h2>
+
+<p>This was the first stage of our update to have a healthy and efficient CI system, after apply these changes we were able to reduce from about 1 hour and 30 minutes per execution.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_11_tt7ewa.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%2011.png" /></p>
+
+<p>To only about 20 minutes.</p>
+
+<p><img src="https://res.cloudinary.com/juancrg90/image/upload/v1590892644/Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled_12_kifcvl.png" alt="Optimizing%20costs%20in%20GitHub%20Actions%207b464c031286482f9b1db7b6d9b72442/Untitled%2012.png" /></p>
+
+<p>The experience of this is, in services where the billing depends on the execution time, saving seconds is crucial, and it is important to pay attention to the little details. Like the <code class="highlighter-rouge">apt-get</code> dependency installation scenario where the dependencies are already installed in the container. Maybe 13 seconds sounds as nothing relevant, but if you consider the number of builds that you have in your company every day probably you can save 1 or two hours per day and this will be reflected in your billing.</p>
+
+<p>The next step is to try to move the dependencies that require to be installed manually into a Docker container (I still need to investigate if this is possible) and use a tool like <a href="https://evilmartians.com/chronicles/testprof-a-good-doctor-for-slow-ruby-tests">TestProf</a> to identify the slowest tests and try to optimize them.</p>
+
+</div>
+
+    </main>
+  </body>
+</html>

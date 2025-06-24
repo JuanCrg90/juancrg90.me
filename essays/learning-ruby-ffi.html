@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Begin Bridgetown SEO tag v5.0.0 -->
+<title>Encapsulating a C library using Ruby ffi | Juan C. Ruiz</title>
+<meta property="og:title" content="Encapsulating a C library using Ruby ffi" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Motivation" />
+<meta property="og:description" content="Motivation" />
+<link rel="canonical" href="/essays/learning-ruby-ffi" />
+<meta property="og:url" content="/essays/learning-ruby-ffi" />
+<meta property="og:site_name" content="Juan C. Ruiz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-01-20T05:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Encapsulating a C library using Ruby ffi" />
+<!-- End Bridgetown SEO tag -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" />
+<link rel="stylesheet" href="/_bridgetown/static/css/main.2d02f55dc6fc19703e21.css" />
+<script src="/_bridgetown/static/js/main.0811b103c2b1181ddec3.js" defer></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-56736524-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-56736524-1');
+</script>
+
+
+
+  </head>
+  <body class="post ">
+    <nav>
+  <ul>
+    <li>
+      <a href="/">Home</a>
+    </li>
+    <li>
+      <a href="/about">About</a>
+    </li>
+    <li>
+      <a href="/posts">Posts</a>
+    </li>
+  </ul>
+</nav>
+
+
+    <main>
+      <div class="post">
+  <h1>Encapsulating a C library using Ruby ffi</h1>
+
+  <h1 id="motivation">Motivation</h1>
+
+<p>Recently I read an article called <strong><a href="https://medium.com/stuart-engineering/ruby-bindings-and-extensions-91c794eb9acd">Ruby Bindings and Extensions</a></strong>
+where the author shows how in his company they were given the task of encapsulating a C library called <a href="https://github.com/uber/h3">H3</a> using Ruby
+and after evaluating the available options they decided to use <a href="https://github.com/ffi/ffi">ffi</a> to do this work.</p>
+
+<p>After reading the article I decided that I wanted to try this. Probably I won’t use this knowledge soon in my current project, but who knows,
+I think it’s a good tool to keep in mind.</p>
+
+<p>In this essay, I want to share the process that I followed to experiment with ffi.</p>
+
+<h1 id="creating-a-c-library-for-experimenting">Creating a C library for experimenting</h1>
+
+<p>I had a while without writing something in C. So I decided to bring back my rusty C programming knowledge, For this task, I decided to create a super
+simple library for managing PGM images with only four functions.</p>
+<ul>
+  <li>A <code class="highlighter-rouge">loadPgm</code> function that loads the PGM file.</li>
+  <li>A <code class="highlighter-rouge">invertColors</code> function that takes the loaded image and creates a new image with the inverted colors.</li>
+  <li>A <code class="highlighter-rouge">savePgm</code> function that saves the generated image in a new file.</li>
+  <li>A <code class="highlighter-rouge">freePgm</code> function that release the allocated memory in the previous functions.</li>
+</ul>
+
+<h1 id="compiling-a-shared-library">Compiling a shared library</h1>
+<p>Well, the first part was easy only bring back some memory allocation, and pass by reference concepts. The second part was remembering how to create a shared library
+with my code. I looked on internet and I found a very well detailed article that explains what is a shared library and how this works here is the link if you are interested
+on learning more about it <strong><a href="https://www.cprogramming.com/tutorial/shared-libraries-linux-gcc.html">Shared libraries with GCC on Linux</a></strong>.</p>
+
+<p>To cover this requirement I added a new task inside my <code class="highlighter-rouge">makefile</code>, that create the shared library from my object file:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shared:
+	<span class="nb">mkdir</span> <span class="nt">-p</span> lib
+	gcc <span class="nt">-c</span> <span class="nt">-fpic</span> ./pgmlib/lib/pgm.c
+	gcc <span class="nt">-shared</span> <span class="nt">-o</span> lib/pgm.so pgm.o
+</code></pre></div></div>
+
+<h1 id="creating-the-ruby-ffi-layer">Creating the Ruby ffi Layer</h1>
+<p>After creates my C library I started to build the ruby logic that wraps my native code.</p>
+
+<p>The first part was downloading the <a href="https://github.com/ffi/ffi">ffi</a> gem. After that, although this is only a proof of concept and my library has only 4 functions I decided to
+take as reference the project created from the Stuart engineering team and use a similar structure in my project.</p>
+
+<p>I created a Structs module that maps the C <code class="highlighter-rouge">Struct</code> with a <code class="highlighter-rouge">FFI::Struct</code>.</p>
+
+<p>C <code class="highlighter-rouge">Struct</code></p>
+<pre><code class="language-C">typedef struct Pgm {
+  char* magicNumber;
+  int width;
+  int height;
+  int maxVal;
+  int** image;
+} Pgm;
+</code></pre>
+
+<p>Ruby <code class="highlighter-rouge">FFI::Struct</code></p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Pgm</span> <span class="o">&lt;</span> <span class="no">FFI</span><span class="o">::</span><span class="no">Struct</span>
+  <span class="n">layout</span> <span class="ss">:magic_number</span><span class="p">,</span> <span class="ss">:string</span><span class="p">,</span>
+         <span class="ss">:width</span><span class="p">,</span> <span class="ss">:int</span><span class="p">,</span>
+         <span class="ss">:height</span><span class="p">,</span> <span class="ss">:int</span><span class="p">,</span>
+         <span class="ss">:max_val</span><span class="p">,</span> <span class="ss">:int</span><span class="p">,</span>
+         <span class="ss">:image</span><span class="p">,</span> <span class="ss">:pointer</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>After That, I created a Base module where I add all the FFI base configuration. Here I specify the route for the shared library and incude the FFI dependency.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Base</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">extended</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="n">lib_path</span> <span class="o">=</span> <span class="no">File</span><span class="p">.</span><span class="nf">expand_path</span><span class="p">(</span><span class="n">__dir__</span> <span class="o">+</span> <span class="s1">'/../../../ext/src/lib'</span><span class="p">)</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">extend</span> <span class="no">FFI</span><span class="o">::</span><span class="no">Library</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">include</span> <span class="no">Structs</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">ffi_lib</span> <span class="s2">"</span><span class="si">#{</span><span class="n">lib_path</span><span class="si">}</span><span class="s2">/pgm.so"</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">typedef</span> <span class="ss">:pointer</span><span class="p">,</span> <span class="ss">:pgm</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>After that, I added a <code class="highlighter-rouge">Functions</code> module that handles the wrapping of the C library functions.</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Functions</span>
+  <span class="kp">extend</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Bindings</span><span class="o">::</span><span class="no">Base</span>
+
+  <span class="n">attach_function</span> <span class="ss">:load_pgm</span><span class="p">,</span> <span class="ss">:loadPgm</span><span class="p">,</span> <span class="sx">%i[pgm string]</span><span class="p">,</span> <span class="ss">:pgm</span>
+  <span class="n">attach_function</span> <span class="ss">:save_pgm</span><span class="p">,</span> <span class="ss">:savePgm</span><span class="p">,</span> <span class="sx">%i[pgm string]</span><span class="p">,</span> <span class="ss">:pgm</span>
+  <span class="n">attach_function</span> <span class="ss">:invert_colors</span><span class="p">,</span> <span class="ss">:invertColors</span><span class="p">,</span> <span class="sx">%i[pgm pgm]</span><span class="p">,</span> <span class="ss">:void</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And finally I added the entry module entry point <code class="highlighter-rouge">pgm.rb</code></p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'ffi'</span>
+
+<span class="nb">require_relative</span> <span class="s1">'./pgm/bindings'</span>
+<span class="nb">require_relative</span> <span class="s1">'./pgm/functions'</span>
+
+<span class="k">module</span> <span class="nn">PGM</span>
+  <span class="kp">extend</span> <span class="no">Functions</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="testing-my-brand-new-ruby-module">Testing my brand new ruby module</h2>
+<p>For this I did the following steps:</p>
+
+<ul>
+  <li>Open a <code class="highlighter-rouge">irb</code> console.</li>
+  <li>Import the pgm ruby module.</li>
+  <li>Create a new instance of the Pgm ffi class.</li>
+  <li>Call the <code class="highlighter-rouge">load_pgm</code> function.</li>
+  <li>Create a new instance of the Pgm class that will get the conversion color output.</li>
+  <li>Call the <code class="highlighter-rouge">invert_colors</code> function.</li>
+  <li>Call the <code class="highlighter-rouge">save_pgm</code> function.</li>
+  <li>Verify that the new image has been created.</li>
+</ul>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;</span> <span class="nb">require</span> <span class="s1">'./lib/pgm'</span>
+<span class="o">=&gt;</span> <span class="kp">true</span>
+<span class="o">&gt;&gt;</span> <span class="n">pgm</span> <span class="o">=</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Bindings</span><span class="o">::</span><span class="no">Structs</span><span class="o">::</span><span class="no">Pgm</span><span class="p">.</span><span class="nf">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;PGM::Bindings::Structs::Pgm:0x00007f9b42806cb0&gt;</span>
+<span class="o">&gt;&gt;</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Functions</span><span class="p">.</span><span class="nf">load_pgm</span><span class="p">(</span><span class="n">pgm</span><span class="p">,</span> <span class="s1">'./lib/feep.pgm'</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;FFI::Pointer address=0x0000000000000000&gt;</span>
+<span class="o">&gt;&gt;</span> <span class="n">pgm_out</span> <span class="o">=</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Bindings</span><span class="o">::</span><span class="no">Structs</span><span class="o">::</span><span class="no">Pgm</span><span class="p">.</span><span class="nf">new</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;PGM::Bindings::Structs::Pgm:0x00007f9b40145e78&gt;</span>
+<span class="o">&gt;&gt;</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Functions</span><span class="p">.</span><span class="nf">invert_colors</span><span class="p">(</span><span class="n">pgm</span><span class="p">,</span> <span class="n">pgm_out</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="kp">nil</span>
+<span class="o">&gt;&gt;</span> <span class="no">PGM</span><span class="o">::</span><span class="no">Functions</span><span class="p">.</span><span class="nf">save_pgm</span><span class="p">(</span><span class="n">pgm_out</span><span class="p">,</span> <span class="s1">'./lib/feep_out.pgm'</span><span class="p">)</span>
+<span class="o">=&gt;</span> <span class="c1">#&lt;FFI::Pointer address=0x0000000000000000&gt;</span>
+</code></pre></div></div>
+
+<p>feep.pgm
+<img src="https://cl.ly/1e2bfc528be8/Image%202019-01-20%20at%2012.59.38%20AM.png" alt="feep.pgm" /></p>
+
+<p>feep_out.pgm
+<img src="https://cl.ly/c5f02807b677/Image%202019-01-20%20at%201.04.51%20AM.png" alt="feep_out.pgm" /></p>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>This was only a proof of concept but I have learned a lot of new things, I think ffi is an amazing alternative when you have native code
+and you want to call it inside your application. If you want to see all the code and play with it here is the repository <strong><a href="https://github.com/JuanCrg90/pgm_ffi">pgm_ffi</a></strong>.</p>
+
+</div>
+
+    </main>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Begin Bridgetown SEO tag v5.0.0 -->
+<title>Cómo utilizar turbo_frame_tag en un layout personalizado | Juan C. Ruiz</title>
+<meta property="og:title" content="Cómo utilizar turbo_frame_tag en un layout personalizado" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Me encuentro trabajando en un side project utilizando Rails 7 y Hotwire, una de las funciones que implementé fue una ventana modal la cual es llamada utilizando turbo_frame_tag para hacer el render del formulario de creación. Todo iba bien hasta que decidí incluir un layout personalizado para el dashboard del usuario con sesión." />
+<meta property="og:description" content="Me encuentro trabajando en un side project utilizando Rails 7 y Hotwire, una de las funciones que implementé fue una ventana modal la cual es llamada utilizando turbo_frame_tag para hacer el render del formulario de creación. Todo iba bien hasta que decidí incluir un layout personalizado para el dashboard del usuario con sesión." />
+<link rel="canonical" href="/posts/como-utilizar-turbo-frame-tag-en-un-layout-personalizado" />
+<meta property="og:url" content="/posts/como-utilizar-turbo-frame-tag-en-un-layout-personalizado" />
+<meta property="og:site_name" content="Juan C. Ruiz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2023-06-11T05:00:00+00:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Cómo utilizar turbo_frame_tag en un layout personalizado" />
+<!-- End Bridgetown SEO tag -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet" />
+<link rel="stylesheet" href="/_bridgetown/static/css/main.2d02f55dc6fc19703e21.css" />
+<script src="/_bridgetown/static/js/main.0811b103c2b1181ddec3.js" defer></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-56736524-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-56736524-1');
+</script>
+
+
+
+  </head>
+  <body class="post ">
+    <nav>
+  <ul>
+    <li>
+      <a href="/">Home</a>
+    </li>
+    <li>
+      <a href="/about">About</a>
+    </li>
+    <li>
+      <a href="/posts">Posts</a>
+    </li>
+  </ul>
+</nav>
+
+
+    <main>
+      <div class="post">
+  <h1>Cómo utilizar turbo_frame_tag en un layout personalizado</h1>
+
+  <p>Me encuentro trabajando en un side project utilizando Rails 7 y Hotwire, una de las funciones que implementé fue una ventana modal la cual es llamada utilizando <code class="highlighter-rouge">turbo_frame_tag</code> para hacer el render del formulario de creación. Todo iba bien hasta que decidí incluir un layout personalizado para el dashboard del usuario con sesión.</p>
+
+<h2 id="tldr">TLDR;</h2>
+
+<p>No cargues el layout de manera estática usando <code class="highlighter-rouge">layout 'custom_layout'</code>. En su lugar, utiliza un método que revise si la solicitud es un <code class="highlighter-rouge">turbo_frame_tag</code>.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Foo::ApplicationController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+
+  <span class="n">layout</span> <span class="ss">:set_custom_layout_with_turbo_frame_support</span>
+
+<span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">set_custom_layout_with_turbo_frame_support</span>
+    <span class="k">return</span> <span class="s1">'custom_layout'</span> <span class="k">unless</span> <span class="n">turbo_frame_request?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="el-problema">El problema</h2>
+
+<p>Inicialmente la lógica para cargar la ventana modal estaba compuesta de 3 elementos:</p>
+
+<p>Una llamada al <code class="highlighter-rouge">turbo_frame_tag</code> en el layout base que contiene mi aplicación de rails</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/layouts/application.html.erb</span>
+<span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= render "shared/alerts" %&gt;
+  &lt;main class=</span><span class="s2">"container mx-auto mt-28 px-5 flex"</span><span class="o">&gt;</span>
+  <span class="o">&lt;</span><span class="sx">%= turbo_frame_tag "modal" %&gt;
+    &lt;%=</span> <span class="k">yield</span> <span class="sx">%&gt;
+  &lt;/main&gt;</span>
+<span class="o">&lt;</span><span class="sr">/body&gt;
+</span></code></pre></div></div>
+
+<p>Una vista la cual contiene el contenido del frame que representa la modal:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/views/elements/new.html.erb</span>
+<span class="o">&lt;</span><span class="sx">%= turbo_frame_tag "modal" do %&gt;
+  &lt;div class=</span><span class="s2">"modal modal-open"</span><span class="p">,</span> <span class="n">data</span><span class="o">-</span><span class="n">controller</span><span class="o">=</span><span class="s2">"turbo-modal"</span><span class="p">,</span> <span class="n">data</span><span class="o">-</span><span class="n">action</span><span class="o">=</span><span class="s2">"..."</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="sx">%= form_with(model: @element, url: element_path, class: 'modal-box') do |form| %&gt;
+      My form content
+    &lt;% end %&gt;
+  &lt;/div&gt;
+&lt;% end %&gt;
+</span></code></pre></div></div>
+
+<p>Y finalmente una llamada al turbo frame utilizando un data attribute:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="sx">%= link_to 'Create Element', new_element_path, class: 'link link-hover', data: { turbo_frame: 'modal' } %&gt;
+</span></code></pre></div></div>
+
+<p>Esto por defecto lo que hace es generar el <code class="highlighter-rouge">turbo-frame</code> y hacer render de este al momento en mi aplicación utilizando las propiedades de <code class="highlighter-rouge">turbo-rails</code></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;turbo-frame</span> <span class="na">id=</span><span class="s">"modal"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"modal modal-open"</span><span class="err">,</span>
+       <span class="na">data-controller=</span><span class="s">"turbo-modal"</span><span class="err">,</span>
+       <span class="na">data-action=</span><span class="s">"...."</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;form</span> <span class="na">class=</span><span class="s">"modal-box"</span> <span class="na">action=</span><span class="s">"/elements"</span> <span class="na">accept-charset=</span><span class="s">"UTF-8"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"authenticity_token"</span> <span class="na">value=</span><span class="s">"xyz"</span> <span class="na">autocomplete=</span><span class="s">"off"</span> <span class="nt">/&gt;</span>
+      My form content
+    <span class="nt">&lt;/form&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/turbo-frame&gt;</span>
+</code></pre></div></div>
+
+<p>El problema inició al crear un nuevo layout idéntico dentro del directorio layouts y colocandolo como el layout por defecto dentro del  <code class="highlighter-rouge">ApplicationController</code> de mi namespace</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Foo::ApplicationController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+  <span class="n">layout</span> <span class="s1">'custom_layout'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Inmediatamente al hacer esto, al momento de dar click en el enlace que llama al turbo frame en lugar de recuperar <code class="highlighter-rouge">&lt;turbo-frame id="modal"&gt;</code> como respuesta del request, comencé a recibir todo el layout como respuesta; lo que provocó que la acción nativa de <code class="highlighter-rouge">turbo-rails</code> dejara de funcionar:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">data-theme=</span><span class="s">"light"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Foo<span class="nt">&lt;/title&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width,initial-scale=1"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"csrf-param"</span> <span class="na">content=</span><span class="s">"authenticity_token"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"csrf-token"</span> <span class="na">content=</span><span class="s">"5QJ-_2XaOHFTaNKEJkLcjOTewSbJ03QMjp6yeVABCkHaP94Uc4la6GnGtxIRp6LmoXAwbpixj657sYrc3ir2Mg"</span> <span class="nt">/&gt;</span>
+
+
+    <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"/assets/tailwind-24d55e02196000307cecef67bba818aa60975a400a31c502e1ad9c155bd7b147.css"</span> <span class="na">data-turbo-track=</span><span class="s">"reload"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"/assets/inter-font-8c3e82affb176f4bca9616b838d906343d1251adc8408efe02cf2b1e4fcf2bc4.css"</span> <span class="na">data-turbo-track=</span><span class="s">"reload"</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"/assets/application-186311012c4e733c61b267717a8abc6092b57cc4ba1b125e36e9c3fc2c3b8e30.css"</span> <span class="na">data-turbo-track=</span><span class="s">"reload"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<h2 id="la-solución">La solución</h2>
+
+<p>Después de investigar un rato y terminar en este <a href="https://github.com/hotwired/turbo-rails/issues/268">issue reportado en 2021</a> en el repositorio de <a href="https://github.com/hotwired/turbo-rails">hotwired/turbo-rails</a> encontré que la solución es verificar si el request viene clasificado como <code class="highlighter-rouge">turbo_frame_request?</code> y si es así devolver <code class="highlighter-rouge">false</code> para evitar que la respuesta incluya el el layout personalizado que agregamos, si tienes curiosidad de como funciona este método <code class="highlighter-rouge">turbo_frame_request?</code> puedes revisarlo <a href="https://github.com/hotwired/turbo-rails/blob/ea00f3732e21af9c2156cf74dabe95524b17c361/app/controllers/turbo/frames/frame_request.rb">en este enlace</a>, prácticamente estamos verificando si el request contiene el header <code class="highlighter-rouge">Turbo-Frame</code>.</p>
+
+<p>La solución puede quedar de la siguiente manera</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Foo::ApplicationController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+
+  <span class="n">layout</span> <span class="ss">:set_custom_layout_with_turbo_frame_support</span>
+
+<span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">set_custom_layout_with_turbo_frame_support</span>
+    <span class="k">return</span> <span class="s1">'custom_layout'</span> <span class="k">unless</span> <span class="n">turbo_frame_request?</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>El <a href="https://github.com/hotwired/turbo-rails/pull/470">5 de Junio de 2023 se abrió un Pull request</a> que agrega una sección al readme para explicar esta situación y como solucionarlo para no terminar navegando entre issues para encontrar como abordar este problema.</p>
+
+</div>
+
+    </main>
+  </body>
+</html>
